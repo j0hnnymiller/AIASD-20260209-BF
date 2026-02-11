@@ -16,4 +16,11 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Exclude test project from main project compilation -->
+    <Compile Remove="PostHubAPI.Tests/**" />
+    <EmbeddedResource Remove="PostHubAPI.Tests/**" />
+    <None Remove="PostHubAPI.Tests/**" />
+  </ItemGroup>
+
 </Project>

@@ -21,60 +21,29 @@ public class PostController(IPostService postService) : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPostById(int id)
     {
-        try
-        {
-            var post = await _postService.GetPostByIdAsync(id);
-            return Ok(post);
-        }
-        catch (NotFoundException exception)
-        {
-            return NotFound(exception.Message);
-        }
+        var post = await _postService.GetPostByIdAsync(id);
+        return Ok(post);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] CreatePostDto dto)
     {
-        if (ModelState.IsValid)
-        {
-            var newPostId = await _postService.CreateNewPostAsync(dto);
-            var locationUri = $"{Request.Scheme}://{Request.Host}/api/Post/{newPostId}";
-            return Created(locationUri, newPostId);
-        }
-
-        return BadRequest(ModelState);
+        var newPostId = await _postService.CreateNewPostAsync(dto);
+        var locationUri = $"{Request.Scheme}://{Request.Host}/api/Post/{newPostId}";
+        return Created(locationUri, newPostId);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> EditPost(int id, EditPostDto dto)
     {
-        try
-        {
-            if (ModelState.IsValid)
-            {
-                var editedPost = await _postService.EditPostAsync(id, dto);
-                return Ok(editedPost);
-            }
-
-            return BadRequest(ModelState);
-        }
-        catch (NotFoundException exception)
-        {
-            return NotFound(exception.Message);
-        }
+        var editedPost = await _postService.EditPostAsync(id, dto);
+        return Ok(editedPost);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePost(int id)
     {
-        try
-        {
-            await _postService.DeletePostAsync(id);
-            return NoContent();
-        }
-        catch(NotFoundException exception)
-        {
-            return NotFound(exception.Message);
-        }
+        await _postService.DeletePostAsync(id);
+        return NoContent();
     }
 }

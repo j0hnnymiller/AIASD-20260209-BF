@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PostHubAPI.Data;
+using PostHubAPI.Filters;
+using PostHubAPI.Middleware;
 using PostHubAPI.Models;
 using PostHubAPI.Services.Implementations;
 using PostHubAPI.Services.Interfaces;
@@ -13,10 +15,19 @@ var configuration = builder.Configuration;
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // Add model validation filter to automatically validate all requests
+    options.Filters.Add<ModelValidationFilter>();
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add exception handling
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(); // For standard problem details format
 
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
@@ -61,6 +72,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Exception handler must be before authentication/authorization
+app.UseExceptionHandler();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -68,3 +82,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Make Program class accessible for integration testing
+public partial class Program { }

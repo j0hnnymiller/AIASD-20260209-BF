@@ -11,30 +11,14 @@ public class UserController(IUserService userService) : ControllerBase
     [HttpPost("Register")]
     public IActionResult Register([FromBody] RegisterUserDto dto)
     {
-        try
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var token = userService.Register(dto);
-            return Ok(token);
-        }
-        catch (ArgumentException exception)
-        {
-            return BadRequest(exception.Message);
-        }
+        var token = userService.Register(dto);
+        return Ok(token);
     }
 
     [HttpPost("Login")]
     public IActionResult Login([FromBody] LoginUserDto dto)
     {
-        try
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var token = userService.Login(dto);
-            return Ok(token);
-        }
-        catch (ArgumentException exception)
-        {
-            return BadRequest(exception.Message);
-        }
+        var token = userService.Login(dto);
+        return Ok(token);
     }
 }

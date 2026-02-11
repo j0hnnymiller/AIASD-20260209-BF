@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PostHubAPI.Data;
 using PostHubAPI.Dtos.Comment;
 using PostHubAPI.Exceptions;
+using PostHubAPI.Extensions;
 using PostHubAPI.Models;
 using PostHubAPI.Services.Interfaces;
 
@@ -12,58 +13,39 @@ public class CommentService(ApplicationDbContext context, IMapper mapper) : ICom
 {
     public async Task<ReadCommentDto> GetCommentAsync(int id)
     {
-        Comment? comment = await context.Comments.FirstOrDefaultAsync(c => c.Id == id);
-        if (comment != null)
-        {
-            ReadCommentDto commentDto = mapper.Map<ReadCommentDto>(comment);
-            return commentDto;
-        }
+        Comment comment = await context.Comments.GetOrThrowAsync(c => c.Id == id, id);
 
-        throw new NotFoundException("Comment not found!!");
+        return mapper.Map<ReadCommentDto>(comment);
     }
 
     public async Task<int> CreateNewCommnentAsync(int postId, CreateCommentDto newComment)
     {
-        Post? post = await context.Posts.FirstOrDefaultAsync(c => c.Id == postId);
-        if (post != null)
-        {
-            Comment comment = mapper.Map<Comment>(newComment);
-            comment.Post = post;
-            comment.PostId = postId;
-            context.Comments.Add(comment);
-            await context.SaveChangesAsync();
-            return comment.Id;
-        }
+        Post post = await context.Posts.GetOrThrowAsync(c => c.Id == postId, postId);
 
-        throw new NotFoundException("Post not found!");
+        Comment comment = mapper.Map<Comment>(newComment);
+        comment.Post = post;
+        comment.PostId = postId;
+        context.Comments.Add(comment);
+        await context.SaveChangesAsync();
+
+        return comment.Id;
     }
 
     public async Task<ReadCommentDto> EditCommentAsync(int id, EditCommentDto dto)
     {
-        Comment? commentToEdit = await context.Comments.FirstOrDefaultAsync(comment => comment.Id == id);
-        if (commentToEdit != null) 
-        {
-            mapper.Map(dto, commentToEdit);
-            await context.SaveChangesAsync();
+        Comment commentToEdit = await context.Comments.GetOrThrowAsync(comment => comment.Id == id, id);
 
-            ReadCommentDto readCommentDto = mapper.Map<ReadCommentDto>(commentToEdit);
-            return readCommentDto;
-        }
+        mapper.Map(dto, commentToEdit);
+        await context.SaveChangesAsync();
 
-        throw new NotFoundException("Comment not found!");
+        return mapper.Map<ReadCommentDto>(commentToEdit);
     }
 
     public async Task DeleteCommentAsync(int id)
     {
-        Comment? comment = await context.Comments.FirstOrDefaultAsync(comment => comment.Id == id);
-        if(comment != null)
-        {
-            context.Comments.Remove(comment);
-            await context.SaveChangesAsync();
-        }
-        else
-        {
-            throw new NotFoundException("Comment not found!");
-        }
+        Comment comment = await context.Comments.GetOrThrowAsync(comment => comment.Id == id, id);
+
+        context.Comments.Remove(comment);
+        await context.SaveChangesAsync();
     }
 }

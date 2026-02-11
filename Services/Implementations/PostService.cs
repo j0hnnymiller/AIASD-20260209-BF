@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PostHubAPI.Data;
 using PostHubAPI.Dtos.Post;
 using PostHubAPI.Exceptions;
+using PostHubAPI.Extensions;
 using PostHubAPI.Models;
 using PostHubAPI.Services.Interfaces;
 
@@ -18,14 +19,11 @@ public class PostService(ApplicationDbContext context, IMapper mapper) : IPostSe
 
     public async Task<ReadPostDto> GetPostByIdAsync(int id)
     {
-        Post? post = await context.Posts.Include(p => p.Comments).FirstOrDefaultAsync(p => p.Id == id);
-        if (post != null)
-        {
-            ReadPostDto dto = mapper.Map<ReadPostDto>(post);
-            return dto;
-        }
+        Post post = await context.Posts
+            .Include(p => p.Comments)
+            .GetOrThrowAsync(p => p.Id == id, id);
 
-        throw new NotFoundException("Post not found!");
+        return mapper.Map<ReadPostDto>(post);
     }
 
     public async Task<int> CreateNewPostAsync(CreatePostDto dto)
@@ -38,32 +36,19 @@ public class PostService(ApplicationDbContext context, IMapper mapper) : IPostSe
 
     public async Task<ReadPostDto> EditPostAsync(int id, EditPostDto dto)
     {
-        Post? postToEdit = await context.Posts.FirstOrDefaultAsync(p => p.Id == id);
-            
-        if (postToEdit != null)
-        {
-            mapper.Map(dto, postToEdit);
-            await context.SaveChangesAsync();
+        Post postToEdit = await context.Posts.GetOrThrowAsync(p => p.Id == id, id);
 
-            ReadPostDto readPost = mapper.Map<ReadPostDto>(postToEdit);
-            return readPost;
-        }
+        mapper.Map(dto, postToEdit);
+        await context.SaveChangesAsync();
 
-        throw new NotFoundException("Post not found!");
+        return mapper.Map<ReadPostDto>(postToEdit);
     }
 
     public async Task DeletePostAsync(int id)
     {
-        Post? post = await context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+        Post post = await context.Posts.GetOrThrowAsync(p => p.Id == id, id);
 
-        if (post != null)
-        {
-            context.Posts.Remove(post);
-            await context.SaveChangesAsync();
-        }
-        else
-        {
-            throw new NotFoundException("Post not found!");
-        }
+        context.Posts.Remove(post);
+        await context.SaveChangesAsync();
     }
 }
