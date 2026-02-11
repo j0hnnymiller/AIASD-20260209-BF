@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using PostHubAPI.Data;
 using PostHubAPI.Dtos.Comment;
-using PostHubAPI.Exceptions;
 using PostHubAPI.Extensions;
 using PostHubAPI.Models;
 using PostHubAPI.Services.Interfaces;
@@ -13,7 +12,7 @@ public class CommentService(ApplicationDbContext context, IMapper mapper) : ICom
 {
     public async Task<ReadCommentDto> GetCommentAsync(int id)
     {
-        Comment comment = await context.Comments.GetOrThrowAsync(c => c.Id == id, "Comment not found!!");
+        Comment comment = await context.Comments.GetOrThrowAsync(c => c.Id == id, "Comment not found!");
         ReadCommentDto commentDto = mapper.Map<ReadCommentDto>(comment);
         return commentDto;
     }

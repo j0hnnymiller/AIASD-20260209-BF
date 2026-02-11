@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using PostHubAPI.Data;
 using PostHubAPI.Dtos.Post;
-using PostHubAPI.Exceptions;
 using PostHubAPI.Extensions;
 using PostHubAPI.Models;
 using PostHubAPI.Services.Interfaces;
