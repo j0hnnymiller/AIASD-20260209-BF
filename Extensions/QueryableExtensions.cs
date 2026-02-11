@@ -11,12 +11,6 @@ public static class QueryableExtensions
         Expression<Func<T, bool>> predicate,
         string errorMessage) where T : class
     {
-        T? entity = await query.FirstOrDefaultAsync(predicate);
-        if (entity != null)
-        {
-            return entity;
-        }
-
-        throw new NotFoundException(errorMessage);
+        return await query.FirstOrDefaultAsync(predicate) ?? throw new NotFoundException(errorMessage);
     }
 }
